@@ -1,0 +1,12 @@
+node_modules
+dist
+coverage
+.git
+.agents
+.codex
+.DS_Store
+.env
+npm-debug.log
+yarn-error.log
+Dockerfile
+docker-compose.yml

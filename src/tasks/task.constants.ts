@@ -1,0 +1,1 @@
+export const DEFAULT_ESTIMATED_MINUTES = 30;

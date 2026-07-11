@@ -1,0 +1,20 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testRegex": ".e2e-spec.ts$",
+  "transform": {
+    "^.+\\.ts$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "^node:buffer$": "<rootDir>/node-builtins/buffer.js",
+    "^node:events$": "<rootDir>/node-builtins/events.js",
+    "^node:fs$": "<rootDir>/node-builtins/fs.js",
+    "^node:http$": "<rootDir>/node-builtins/http.js",
+    "^node:https$": "<rootDir>/node-builtins/https.js",
+    "^node:net$": "<rootDir>/node-builtins/net.js",
+    "^node:path$": "<rootDir>/node-builtins/path.js",
+    "^node:querystring$": "<rootDir>/node-builtins/querystring.js",
+    "^node:zlib$": "<rootDir>/node-builtins/zlib.js"
+  }
+}
