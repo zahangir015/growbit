@@ -5,6 +5,8 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { configValidationSchema } from './config.schema';
 import { GoalsModule } from './goals/goals.module';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 
 @Module({
@@ -13,6 +15,12 @@ import { GoalsModule } from './goals/goals.module';
       envFilePath: [`.env.stage.${process.env.STAGE}`],
       validationSchema: configValidationSchema
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60 * 1000,
+        limit: 100,
+      },
+    ]),
     TasksModule,
     TypeOrmModule.forRootAsync({
       imports: [
@@ -42,6 +50,12 @@ import { GoalsModule } from './goals/goals.module';
     // }),
     AuthModule,
     GoalsModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule {}

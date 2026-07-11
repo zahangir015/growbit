@@ -48,9 +48,17 @@ DB_USERNAME=postgres
 DB_PASSWORD=postgres
 DB_DATABASE=task-management
 JWT_SECRET=replace-with-a-long-random-secret
+PASSWORD_RESET_URL=http://localhost:3001/reset-password
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=replace-me
+SMTP_PASSWORD=replace-me
+SMTP_FROM=Growbit <no-reply@example.com>
 ```
 
 The application validates all required database variables, `STAGE`, and `JWT_SECRET` during startup.
+
+Password-reset tokens are never returned by the API. Configure SMTP to deliver the single-use, 15-minute reset link. Production requires SMTP settings and an HTTPS `PASSWORD_RESET_URL`.
 
 > Do not commit production secrets. Use a separate `.env.stage.prod` or runtime environment variables for production.
 

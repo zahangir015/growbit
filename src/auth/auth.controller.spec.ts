@@ -68,7 +68,7 @@ describe('AuthController', () => {
 
     it('starts password reset through POST /auth/forgot-password', async () => {
         const dto: ForgotPasswordDto = { email: 'test@example.com' };
-        const response = { message: 'Reset token generated', resetToken: 'reset-token' };
+        const response = { message: 'Reset instructions sent' };
 
         mockAuthService.forgotPassword.mockResolvedValue(response);
 
@@ -77,7 +77,11 @@ describe('AuthController', () => {
     });
 
     it('resets a password through POST /auth/reset-password', async () => {
-        const dto: ResetPasswordDto = { token: 'reset-token', password: 'NewPassword1!' };
+        const dto: ResetPasswordDto = {
+            token: 'reset-token',
+            password: 'NewPassword1!',
+            passwordConfirmation: 'NewPassword1!',
+        };
         const response = { message: 'Password reset successfully' };
 
         mockAuthService.resetPassword.mockResolvedValue(response);

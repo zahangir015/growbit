@@ -8,6 +8,7 @@
   },
   "moduleNameMapper": {
     "^node:buffer$": "<rootDir>/node-builtins/buffer.js",
+    "^node:crypto$": "<rootDir>/node-builtins/crypto.js",
     "^node:events$": "<rootDir>/node-builtins/events.js",
     "^node:fs$": "<rootDir>/node-builtins/fs.js",
     "^node:http$": "<rootDir>/node-builtins/http.js",

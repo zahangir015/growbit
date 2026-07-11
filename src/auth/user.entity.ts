@@ -14,14 +14,17 @@ export class User {
     @Column({ type: 'varchar', unique: true, nullable: true })
     email?: string | null;
 
-    @Column()
+    @Column({ select: false })
     password!: string;
 
-    @Column({ type: 'varchar', nullable: true })
+    @Column({ type: 'varchar', nullable: true, unique: true, select: false })
     password_reset_token?: string | null;
 
     @Column({ type: 'timestamp', nullable: true })
     password_reset_expires_at?: Date | null;
+
+    @Column({ type: 'int', default: 0 })
+    token_version!: number;
 
     @OneToMany((_type) => Task, (task) => task.user, { eager: true})
     tasks!: Task[];

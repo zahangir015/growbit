@@ -1,8 +1,8 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, Logger, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './jwt-payload.interface';
@@ -10,15 +10,20 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { createHash, randomBytes } from 'crypto';
 import { SignUpDto } from './dto/sign-up.dto';
+import { PasswordResetEmailService } from './password-reset-email.service';
 
 const PASSWORD_RESET_TOKEN_TTL_MS = 15 * 60 * 1000;
 
 @Injectable()
 export class AuthService {
+    private readonly logger = new Logger(AuthService.name);
+
     constructor(
         @InjectRepository(User)
         private userRepository: Repository<User>,
         private jwtService: JwtService,
+        private dataSource: DataSource,
+        private passwordResetEmailService: PasswordResetEmailService,
     ) {}
 
     async createUser(signUpDto: SignUpDto): Promise<void> {
@@ -46,23 +51,31 @@ export class AuthService {
     async login(authCredentialsDto: AuthCredentialsDto): Promise<{ accessToken: string }> {
         const { username, password } = authCredentialsDto;
 
-        const user = await this.userRepository.findOne({ where: { username } });
+        const user = await this.userRepository
+            .createQueryBuilder('user')
+            .addSelect('user.password')
+            .where('user.username = :username', { username })
+            .getOne();
 
         if (user && await bcrypt.compare(password, user.password)) {
-            const payload : JwtPayload = { username };
+            const payload : JwtPayload = {
+                sub: user.id,
+                username: user.username,
+                tokenVersion: user.token_version,
+            };
 
             const accessToken = this.jwtService.sign(payload);
 
             return { accessToken };
         } else {
-            throw new InternalServerErrorException('Invalid credentials');
+            throw new UnauthorizedException('Invalid username or password');
         }
     }
 
-    async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<{ message: string; resetToken?: string }> {
+    async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<{ message: string }> {
         const { email } = forgotPasswordDto;
         const user = await this.userRepository.findOne({ where: { email } });
-        const message = 'If that user exists, a password reset token has been generated';
+        const message = 'If an account exists for that email, password reset instructions have been sent';
 
         if (!user) {
             return { message };
@@ -75,29 +88,61 @@ export class AuthService {
         try {
             await this.userRepository.save(user);
         } catch {
-            throw new InternalServerErrorException('Failed to create password reset token');
+            this.logger.error('Failed to create password reset token');
+            return { message };
         }
 
-        return { message, resetToken };
+        try {
+            await this.passwordResetEmailService.sendPasswordReset(email, resetToken);
+        } catch {
+            user.password_reset_token = null;
+            user.password_reset_expires_at = null;
+            try {
+                await this.userRepository.save(user);
+            } catch {
+                this.logger.error('Failed to invalidate an undelivered password reset token');
+            }
+            this.logger.error('Password reset email delivery failed');
+        }
+
+        return { message };
     }
 
     async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<{ message: string }> {
-        const { token, password } = resetPasswordDto;
-        const passwordResetToken = this.hashResetToken(token);
-        const user = await this.userRepository.findOne({ where: { password_reset_token: passwordResetToken } });
+        const { token, password, passwordConfirmation } = resetPasswordDto;
 
-        if (!user || !user.password_reset_expires_at || user.password_reset_expires_at.getTime() < Date.now()) {
-            throw new BadRequestException('Invalid or expired password reset token');
+        if (password !== passwordConfirmation) {
+            throw new BadRequestException('Passwords do not match');
         }
 
-        user.password = await bcrypt.hash(password, await bcrypt.genSalt());
-        user.password_reset_token = null;
-        user.password_reset_expires_at = null;
+        const passwordResetToken = this.hashResetToken(token);
+        let email: string | null | undefined;
 
-        try {
-            await this.userRepository.save(user);
-        } catch {
-            throw new InternalServerErrorException('Failed to reset password');
+        await this.dataSource.transaction(async(manager) => {
+            const user = await manager
+                .getRepository(User)
+                .createQueryBuilder('user')
+                .addSelect('user.password_reset_token')
+                .setLock('pessimistic_write')
+                .where('user.password_reset_token = :passwordResetToken', { passwordResetToken })
+                .andWhere('user.password_reset_expires_at > :now', { now: new Date() })
+                .getOne();
+
+            if (!user) {
+                throw new BadRequestException('Invalid or expired password reset token');
+            }
+
+            user.password = await bcrypt.hash(password, await bcrypt.genSalt());
+            user.password_reset_token = null;
+            user.password_reset_expires_at = null;
+            user.token_version += 1;
+            email = user.email;
+
+            await manager.save(user);
+        });
+
+        if (email) {
+            this.passwordResetEmailService.sendPasswordChanged(email).catch(() => undefined);
         }
 
         return { message: 'Password reset successfully' };

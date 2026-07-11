@@ -97,7 +97,7 @@ describe('API endpoints (e2e)', () => {
   it('handles every auth endpoint', async () => {
     authService.createUser.mockResolvedValue(undefined);
     authService.login.mockResolvedValue({ accessToken: 'jwt-token' });
-    authService.forgotPassword.mockResolvedValue({ message: 'Reset started', resetToken: 'reset-token' });
+    authService.forgotPassword.mockResolvedValue({ message: 'Reset started' });
     authService.resetPassword.mockResolvedValue({ message: 'Password reset successfully' });
 
     await request(app.getHttpServer())
@@ -113,10 +113,14 @@ describe('API endpoints (e2e)', () => {
       .post('/auth/forgot-password')
       .send({ email: 'test@example.com' })
       .expect(201)
-      .expect({ message: 'Reset started', resetToken: 'reset-token' });
+      .expect({ message: 'Reset started' });
     await request(app.getHttpServer())
       .post('/auth/reset-password')
-      .send({ token: 'reset-token', password: 'NewPassword1!' })
+      .send({
+        token: 'reset-token',
+        password: 'NewPassword1!',
+        passwordConfirmation: 'NewPassword1!',
+      })
       .expect(201)
       .expect({ message: 'Password reset successfully' });
 
