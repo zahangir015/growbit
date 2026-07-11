@@ -52,6 +52,11 @@ describe('TasksController', () => {
         controller = new TasksController(mockTasksService as unknown as TasksService);
     });
 
+    it('limits the tasks module to 60 requests per minute', () => {
+        expect(Reflect.getMetadata('THROTTLER:LIMITdefault', TasksController)).toBe(60);
+        expect(Reflect.getMetadata('THROTTLER:TTLdefault', TasksController)).toBe(60 * 1000);
+    });
+
     it('gets tasks through GET /tasks', async () => {
         const filterDto: FilterTaskDto = { status: TaskStatus.IN_PROGRESS, search: 'auth' };
         const tasks = [{ id: 'task-id', title: 'Build auth' } as Task];

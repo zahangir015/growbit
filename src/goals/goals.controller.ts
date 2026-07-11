@@ -9,9 +9,11 @@ import { GoalProgressSummary } from './interfaces/goal-progress-summary.interfac
 import { GoalsService } from './goals.service';
 import { GoalProgressHistoryEntry } from './interfaces/goal-progress-history-entry.interface';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('goals')
 @UseGuards(AuthGuard())
+@Throttle({ default: { limit: 60, ttl: 60 * 1000 } })
 @ApiTags('Goals')
 @ApiBearerAuth('access-token')
 export class GoalsController {

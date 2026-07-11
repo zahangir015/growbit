@@ -11,9 +11,11 @@ import { Logger } from '@nestjs/common';
 import { TaskCompletionResponse } from './interfaces/task-completion-response.interface';
 import { UpdateTaskProgressDto } from './dto/update-task-progress.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('tasks')
 @UseGuards(AuthGuard())
+@Throttle({ default: { limit: 60, ttl: 60 * 1000 } })
 @ApiTags('Tasks')
 @ApiBearerAuth('access-token')
 export class TasksController {

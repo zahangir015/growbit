@@ -60,6 +60,18 @@ The application validates all required database variables, `STAGE`, and `JWT_SEC
 
 Password-reset tokens are never returned by the API. Configure SMTP to deliver the single-use, 15-minute reset link. Production requires SMTP settings and an HTTPS `PASSWORD_RESET_URL`.
 
+Rate limits are enforced per client IP:
+
+| Scope | Limit |
+| --- | --- |
+| API fallback | 100 requests per minute |
+| Tasks module | 60 requests per minute |
+| Goals module | 60 requests per minute |
+| Login | 5 requests per minute |
+| Signup | 5 requests per hour |
+| Forgot password | 3 requests per 15 minutes |
+| Reset password | 5 requests per 15 minutes |
+
 > Do not commit production secrets. Use a separate `.env.stage.prod` or runtime environment variables for production.
 
 ## Run locally

@@ -55,6 +55,11 @@ describe('GoalsController', () => {
         controller = new GoalsController(mockGoalsService as unknown as GoalsService);
     });
 
+    it('limits the goals module to 60 requests per minute', () => {
+        expect(Reflect.getMetadata('THROTTLER:LIMITdefault', GoalsController)).toBe(60);
+        expect(Reflect.getMetadata('THROTTLER:TTLdefault', GoalsController)).toBe(60 * 1000);
+    });
+
     it('creates a goal through the service', async () => {
         const createGoalDto: CreateGoalDto = {
             title: 'Learn NestJS',
