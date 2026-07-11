@@ -189,6 +189,21 @@ yarn lint           # lint and apply fixes
 yarn format         # format source and test files
 ```
 
+## CI/CD
+
+GitHub Actions runs the CI workflow on every push and pull request targeting `master` or `main`. The workflow:
+
+1. Checks out the repository on a clean Ubuntu runner.
+2. Installs Node.js `26.4.0` and enables Yarn dependency caching.
+3. Reproduces dependencies from `yarn.lock` with `yarn install --frozen-lockfile`.
+4. Runs unit tests.
+5. Runs endpoint-level end-to-end tests.
+6. Builds the NestJS application.
+
+The workflow is defined in [`.github/workflows/ci.yml`](.github/workflows/ci.yml). A failed step stops the job and prevents the CI check from passing.
+
+Continuous deployment will be added after selecting a deployment target. Deployment credentials must be stored in GitHub Actions secrets, never in the repository.
+
 ## Production image
 
 Build the production stage:
