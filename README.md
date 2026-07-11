@@ -1,116 +1,216 @@
-# growbit
-Growbit is a personal goal and task management application. Users create goals, attach optional tasks, track partial task completion, and view weighted goal progress over time.
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
-</p>
+# Growbit
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+**Small progress every day.**
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Growbit is a REST API for personal goal and task management. Users can create goals, attach optional tasks, track partial completion, and monitor weighted goal progress and daily progress history.
 
-## Description
+## Features
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- Signup and login with JWT authentication
+- Forgot-password and reset-password flows
+- Goal creation, updates, deletion, priorities, statuses, and date ranges
+- Standalone tasks or tasks linked to a goal
+- Task status, priority, estimates, actual time, and partial completion
+- Weighted goal progress based on task estimates
+- Goal progress recalculation and historical progress logs
+- Request validation and consistent response transformation
+- Interactive Swagger/OpenAPI documentation
+- Dockerized NestJS, PostgreSQL, and pgAdmin development stack
 
-## Installation
+## Tech stack
 
-```bash
-$ yarn install
+- NestJS 11 and TypeScript
+- PostgreSQL and TypeORM
+- Passport, JWT, and bcrypt
+- class-validator and class-transformer
+- Swagger/OpenAPI
+- Jest
+- Docker Compose
+
+## Prerequisites
+
+For local development:
+
+- Node.js 26
+- Yarn 1.22
+- PostgreSQL
+
+Alternatively, install Docker and Docker Compose to run the complete stack.
+
+## Environment configuration
+
+Local development loads `.env.stage.dev` because `yarn start:dev` sets `STAGE=dev`.
+
+```env
+DB_HOST=localhost
+DB_PORT=5434
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+DB_DATABASE=task-management
+JWT_SECRET=replace-with-a-long-random-secret
 ```
 
-## Running the app
+The application validates all required database variables, `STAGE`, and `JWT_SECRET` during startup.
+
+> Do not commit production secrets. Use a separate `.env.stage.prod` or runtime environment variables for production.
+
+## Run locally
+
+Install dependencies:
 
 ```bash
-# development
-$ yarn start
-
-# watch mode
-$ yarn start:dev
-
-# production mode
-$ yarn build
-$ yarn start:prod
+yarn install
 ```
 
-## Running with Docker
+Start PostgreSQL, ensure `.env.stage.dev` is configured, then run:
 
 ```bash
-# start NestJS and Postgres
-$ docker compose up --build
-
-# run in the background
-$ docker compose up --build -d
-
-# stop containers
-$ docker compose down
-
-# stop containers and remove database volume
-$ docker compose down -v
+yarn start:dev
 ```
 
-The Docker setup uses Node `26.4.0`, Yarn `1.22.22`, and the installed Nest `11.1.27` packages. The app is available at `http://localhost:3000`, pgAdmin is available at `http://localhost:5050`, and Postgres is exposed on host port `5434` by default. Use `POSTGRES_HOST_PORT=5433 docker compose up --build` if you want the host database port to match the local non-Docker default.
+The API runs at `http://localhost:3000` and Swagger UI is available at `http://localhost:3000/api-docs`.
 
-If port `3000` is already in use, start the app on another host port:
+Other useful commands:
 
 ```bash
-$ APP_HOST_PORT=3001 docker compose up --build
+STAGE=dev yarn start # one-time development start
+yarn start:debug    # watch mode with debugger
+yarn build          # compile the application
+yarn start:prod     # run the compiled dist/main entry point
 ```
 
-pgAdmin login:
+## Run with Docker
+
+Start the application, PostgreSQL, and pgAdmin:
+
+```bash
+docker compose up --build
+```
+
+Run in the background or stop the stack:
+
+```bash
+docker compose up --build -d
+docker compose down
+```
+
+To also remove database and pgAdmin volumes:
+
+```bash
+docker compose down -v
+```
+
+Default services:
+
+| Service | Address |
+| --- | --- |
+| Growbit API | `http://localhost:3000` |
+| Swagger UI | `http://localhost:3000/api-docs` |
+| PostgreSQL | `localhost:5434` |
+| pgAdmin | `http://localhost:5050` |
+
+Override host ports when needed:
+
+```bash
+APP_HOST_PORT=3001 POSTGRES_HOST_PORT=5435 PGADMIN_HOST_PORT=5051 docker compose up --build
+```
+
+### pgAdmin
+
+Sign in with:
 
 ```text
 Email: admin@example.com
 Password: admin
 ```
 
-In pgAdmin, add a server with these connection settings:
+Register the Docker PostgreSQL server with:
 
 ```text
-Host name/address: postgres
+Host: postgres
 Port: 5432
-Maintenance database: task-management
+Database: task-management
 Username: postgres
 Password: postgres
 ```
 
-For production image builds:
+## API overview
+
+Authentication endpoints are public. Task and goal endpoints require:
+
+```http
+Authorization: Bearer <accessToken>
+```
+
+### Authentication
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `POST` | `/auth/signup` | Create an account |
+| `POST` | `/auth/login` | Sign in and receive an access token |
+| `POST` | `/auth/forgot-password` | Request a password-reset token |
+| `POST` | `/auth/reset-password` | Set a new password using the reset token |
+
+### Tasks
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/tasks` | List tasks; filter with `status` and `search` |
+| `GET` | `/tasks/:id` | Get one task |
+| `POST` | `/tasks` | Create a standalone or goal-linked task |
+| `PATCH` | `/tasks/:id/status` | Update task status |
+| `PATCH` | `/tasks/:taskId/complete` | Mark a task complete |
+| `PATCH` | `/tasks/:taskId/progress` | Update partial progress |
+| `DELETE` | `/tasks/:id` | Delete a task |
+
+### Goals
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/goals` | List goals |
+| `GET` | `/goals/:id` | Get one goal |
+| `POST` | `/goals` | Create a goal |
+| `PATCH` | `/goals/:id` | Update a goal |
+| `DELETE` | `/goals/:id` | Delete a goal |
+| `GET` | `/goals/:goalId/progress` | Get calculated progress |
+| `GET` | `/goals/:goalId/progress/history` | Get daily progress history |
+| `POST` | `/goals/:goalId/progress/recalculate` | Recalculate progress from linked tasks |
+
+See [the application documentation](docs/GROWBIT_APPLICATION_DOCUMENTATION.md) for data models, validation rules, example requests, progress calculation details, and response formats.
+
+## Tests and quality checks
 
 ```bash
-$ docker build --target production -t nestjs-task-management .
-$ docker run --rm -p 3000:3000 \
+yarn test           # unit tests
+yarn test:watch     # unit tests in watch mode
+yarn test:e2e       # end-to-end tests
+yarn test:cov       # coverage report
+yarn lint           # lint and apply fixes
+yarn format         # format source and test files
+```
+
+## Production image
+
+Build the production stage:
+
+```bash
+docker build --target production -t growbit .
+```
+
+Run it against a reachable PostgreSQL instance:
+
+```bash
+docker run --rm -p 3000:3000 \
+  -e STAGE=prod \
   -e DB_HOST=host.docker.internal \
-  -e DB_PORT=5433 \
+  -e DB_PORT=5434 \
   -e DB_USERNAME=postgres \
   -e DB_PASSWORD=postgres \
   -e DB_DATABASE=task-management \
-  nestjs-task-management
+  -e JWT_SECRET=replace-with-a-long-random-secret \
+  growbit
 ```
 
-## Test
+## License
 
-```bash
-# unit tests
-$ yarn test
-
-# e2e tests
-$ yarn test:e2e
-
-# test coverage
-$ yarn test:cov
-```
+This project is currently unlicensed and marked `UNLICENSED` in `package.json`.
