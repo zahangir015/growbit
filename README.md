@@ -48,6 +48,8 @@ DB_USERNAME=postgres
 DB_PASSWORD=postgres
 DB_DATABASE=task-management
 JWT_SECRET=replace-with-a-long-random-secret
+CORS_ORIGINS=http://localhost:3001
+REQUEST_BODY_LIMIT=100kb
 PASSWORD_RESET_URL=http://localhost:3001/reset-password
 SMTP_HOST=smtp.example.com
 SMTP_PORT=587
@@ -59,6 +61,10 @@ SMTP_FROM=Growbit <no-reply@example.com>
 The application validates all required database variables, `STAGE`, and `JWT_SECRET` during startup.
 
 Password-reset tokens are never returned by the API. Configure SMTP to deliver the single-use, 15-minute reset link. Production requires SMTP settings and an HTTPS `PASSWORD_RESET_URL`.
+
+`CORS_ORIGINS` is a comma-separated browser-origin allowlist. Growbit applies Helmet security headers, rejects unrecognized DTO properties, limits JSON and URL-encoded bodies to `REQUEST_BODY_LIMIT`, and disables Swagger in production.
+
+TypeORM schema synchronization is enabled only for development. Production uses `synchronize: false`; create and run version-controlled migrations before deploying schema changes.
 
 Rate limits are enforced per client IP:
 

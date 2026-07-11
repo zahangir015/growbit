@@ -30,10 +30,12 @@ import { APP_GUARD } from '@nestjs/core';
         ConfigService
       ],
       useFactory: async(configService: ConfigService) => {
+        const isProduction = configService.get<string>('STAGE') === 'prod';
+
         return {
           type: 'postgres',
           autoLoadEntities: true,
-          synchronize: true,
+          synchronize: !isProduction,
           host: configService.get('DB_HOST'),
           port: configService.get('DB_PORT'),
           username: configService.get('DB_USERNAME'),
@@ -42,12 +44,6 @@ import { APP_GUARD } from '@nestjs/core';
         };
       },
     }),
-    // TypeOrmModule.forRoot({
-    //   type: 'postgres',
-
-    //   autoLoadEntities: true,
-    //   synchronize: true,
-    // }),
     AuthModule,
     GoalsModule,
   ],
